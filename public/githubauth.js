@@ -8,7 +8,10 @@ function GitHubAuth(){
         fetch(method="POST",body=urlencode,headers={"Content-Type":"application/x-www-form-urlencoded"})
         .then(response => response.split("&"))
 
-        response
+        device_code = response[0]
+        exp_time = response[1]
+        interval = response[2]
+        user_code = response[3]
         
     }else{
         window.location.href="https://github.com/Hex-Dragon/PCL2/issues"
@@ -16,4 +19,7 @@ function GitHubAuth(){
     clipboardData.setData("Text", user_code)
     var authwindow = window.open("https://github.com/login/device","_blank", "width=600,height=400,menubar=no,toolbar=no,location=no")
     authwindow.document.title = `授权代码为：${user_code} 请在输入框粘贴此内容`
+    while (true){
+        
+    }
 }
