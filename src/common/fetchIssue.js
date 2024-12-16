@@ -1,6 +1,4 @@
-function OAuthLogin(){
-    authwindow = window.open("https://github.com/login/device","_blank", 'width=600,height=400,menubar=no,toolbar=no,location=no)
-}
+
 
 function getQueryParam(name, url) {
     const urlParams = new URLSearchParams(url.split('?')[1]);
