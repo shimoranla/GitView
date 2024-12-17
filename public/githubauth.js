@@ -11,26 +11,29 @@ async function GitHubAuth(){
         urlencode.append("client_id",client_id)
         urlencode.append("scope","repo")
 
-        fetch("https://github.com/login/device/code",
-            method="POST" ,
-            body=urlencode,
-            headers={
+        await fetch("https://github.com/login/device/code",
+            {method:"POST" ,
+            body:urlencode,
+            headers:{
                 "Content-Type":"application/x-www-form-urlencoded",
                 "Accept":"application/json"
             }
+        }
         )
         .then(response => response.json())
         .then(data => {
-
+            
             device_code = data.device_code
             user_code = data.user_code
             interval = data.interval
             exp_time = data.expires_in
         })
-        .catch()
+        .catch((error) => {
+            console.log(String(error))
+        })
         
         device_code = data[0]
-        exp_time = Date.now() + data[1]
+        exp_time = new Date().getTime() + data[1]
         interval = data[2]
         user_code = data[3]
         var status = await device_login(device_code=device_code,exp_time=exp_time,client_id=client_id,every_request_wait_time=interval*1000) 
@@ -49,7 +52,7 @@ async function GitHubAuth(){
 
 
 
-async function devicelogin(device_code:String,exp_time:Number,client_id:String,every_request_wait_time:number) {
+async function devicelogin(device_code,exp_time,client_id,every_request_wait_time) {
     var url_query = new URLSearchParams()
     url_query.append("client_id",client_id)
     url_query.append("device_code",device_code)
@@ -70,10 +73,10 @@ async function devicelogin(device_code:String,exp_time:Number,client_id:String,e
         .then(data => {
             if(response.status == 401){
                 if (data.error == "authorization_pending"){
-                    continue
+                    
                 }
                 else if (data.error == "slow_down"){
-                    setTimeout(() => {continue},every_request_wait_time+5*1000)
+                    setTimeout(() => {},every_request_wait_time+5*1000)
                 }
                 else if(data.error == "expired_token"){
                     return [false,"登录令牌已过期"]
