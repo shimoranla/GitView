@@ -11,7 +11,7 @@ async function GitHubAuth(){
         urlencode.append("client_id",client_id)
         urlencode.append("scope","repo")
 
-        await fetch("https://github.com/login/device/code",
+        fetch("https://github.com/login/device/code",
             {method:"POST" ,
             body:urlencode,
             headers:{
@@ -20,16 +20,15 @@ async function GitHubAuth(){
             }
         }
         )
-        .then(response => response.json())
-        .then(data => {
-            
+        .then(response => {
+            var data = response.json()   
             device_code = data.device_code
             user_code = data.user_code
             interval = data.interval
             exp_time = data.expires_in
         })
         .catch((error) => {
-            console.log(String(error))
+            console.log(String("maybe"))
         })
         
         device_code = data[0]
