@@ -1,3 +1,18 @@
+import {IllegalArgumentException,InterruptedException} from "./Exception.js";
+
+
+async function TextCode(blob,IsDecode=true) {
+    if (IsDecode){
+        let decode = new TextDecoder()
+        return decode.decode(blob)
+    }
+    else {
+        let encode = new TextEncoder()
+        return encode.encode(blob)
+    }
+    
+}
+
 async function GitHubAuth(){
     var select = confirm("获取数据需要授权登录到 GitHub\n按确定将开始登录\n按取消将重定向至 GitHub 仓库")
     var user_code = ""
@@ -11,30 +26,9 @@ async function GitHubAuth(){
         urlencode.append("client_id",client_id)
         urlencode.append("scope","repo")
 
-        fetch("https://github.com/login/device/code",
-            {method:"POST" ,
-            body:urlencode,
-            headers:{
-                "Content-Type":"application/x-www-form-urlencoded",
-                "Accept":"application/json"
-            }
-        }
-        )
-        .then(response => {
-            var data = response.json()   
-            device_code = data.device_code
-            user_code = data.user_code
-            interval = data.interval
-            exp_time = data.expires_in
-        })
-        .catch((error) => {
-            console.log(String("maybe"))
-        })
-        
-        device_code = data[0]
+        resp = await NetworkRequest(url="",method="POST",data=urlencode)
+        //device_code = data[0]
         exp_time = new Date().getTime() + data[1]
-        interval = data[2]
-        user_code = data[3]
         var status = await device_login(device_code=device_code,exp_time=exp_time,client_id=client_id,every_request_wait_time=interval*1000) 
         if (status[0]){
 
@@ -52,12 +46,14 @@ async function GitHubAuth(){
 
 
 async function devicelogin(device_code,exp_time,client_id,every_request_wait_time) {
+    let controller = new AbortController()
+    let signle = controller.signal
     var url_query = new URLSearchParams()
     url_query.append("client_id",client_id)
     url_query.append("device_code",device_code)
     url_query.append("grant_type","urn:ietf:params:oauth:grant-type:device_code")
     var query_url = "https://github.com/login/oauth/access_token"
-    while(exp_time - Date.now() <= 0){
+    while(exp_time - Date.now() <= 0 || signle.aborted){
         setTimeout(() =>
         fetch(query_url,{
             method:"POST",
@@ -89,6 +85,7 @@ async function devicelogin(device_code,exp_time,client_id,every_request_wait_tim
         )
     ,every_request_wait_time)
         }
-        return [false,"登录超时"]
+        if (signle.aborted) throw new InterruptedException("操作被中止")
+        return 
         }
     
