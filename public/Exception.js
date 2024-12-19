@@ -69,6 +69,9 @@ class HTTPException extends Error {
         if (status == 511) description = "需要网络认证" 
         // 非标准状态码
         if (status == 1000) description = "请求超时"
+        if (status == 1001) description = "未能解析此远程名称"
+        if (status == 1002) description = "权限不足" 
+        if (status == 1004) description = "未能建立 SSL/TLS 连接"
         super(description)
         this.description = description
         this.status = status
